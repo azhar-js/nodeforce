@@ -1,4 +1,31 @@
 
 Nodeforce is a simple nodes module that allows you to connect your Nodejs app with your salesforce instance. Currently its in Beta.
 Updates are expected on every weekend.
+How to use ?
+
+var sfdc = require('./nodeforce');
+app.get("*", function(request, response) {
+	var con = new sfdc.Connection({
+			clientId : "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					clientSecret: 'xxxxxxxxxxxxxxxxxxx',
+							redirectUri: 'http://localhost:3000/oauth/_callback',//optional 
+									environment : 'production',
+											username : 'xxxxx@xxxx.com',
+												  	password : 'abcdefghijk',
+														  	securityToken : 'xxxxxxxxxxxxx',
+																  	mode : 'multi',
+																		  	apiVersion : '29.0',
+
+
+																				}, function(err, body, resp) {
+																						con.query(resp, 'SELECT Id, Account__r.Name FROM customerInfo__c', function(err, res, body) {
+																									outputFile.pipe("hellloooooooooooo");
+																												response.end(JSON.stringify(body));
+																														})
+																															});
+
+																															});
+																										
+
+
 

@@ -9,7 +9,7 @@ var endpoints = {
 	API_VERSIONS        :  ['v20.0', 'v21.0', 'v22.0', 'v23.0', 'v24.0', 'v25.0', 'v26.0', 'v27.0', 'v28.0', 'v29.0']
 }
 
-var Connection = function(opts) {
+var Connection = function(opts, callback) {
 
 	if(!opts.clientId || typeof opts.clientId  != 'string') {
 		throw new Error('Invalid clientId');
@@ -32,6 +32,7 @@ var Connection = function(opts) {
  	else {
 		if(/^\d\d\.\d$/.test(opts.apiVersion)) {
  			opts.apiVersion = "v"+opts.apiVersion;
+ 			this.apiVersion = opts.apiVersion;
  		}
  		else {
  			throw new Error(' apiVersion should be like 27.0 ')
@@ -40,10 +41,12 @@ var Connection = function(opts) {
  	if(!opts.securityToken) {
  		throw new Error(' Invalid security token')
  	}
- 	this.buildAuthObj(opts);
+ 	
+ 	this.buildAuthObj(opts, callback);
+ 	return this;
 }
 
-Connection.prototype.buildAuthObj = function(opts) {
+Connection.prototype.buildAuthObj = function(opts, callback) {
 	var reqObj = {}, uri = "";
 
 		reqObj['client_id'] = opts.clientId;
@@ -68,13 +71,33 @@ Connection.prototype.buildAuthObj = function(opts) {
 			   'Content-Type': 'application/x-www-form-urlencoded'
 		    }
 		}
-
-		console.log(JSON.stringify(reqOpts));
-
-		request(reqOpts, function(err, body, resp) {
-			console.log(JSON.stringify(err));
-			console.log(JSON.stringify(resp));
-		});
+		request(reqOpts, callback);
 }
 
+
+Connection.prototype.query = function(oauth, query, callback) {
+console.log('inside query')
+	var oauth = JSON.parse(oauth);
+	var uri = oauth.instance_url+'/services/data'+this.apiVersion+'/queryAll';
+	var opt = { 
+			 	"uri" : uri,
+			 	"method" : "GET",
+			 	"qs" : {q : query}			
+			  }
+	this.queryApi(oauth, opt, callback);
+
+}
+Connection.prototype.queryApi = function(oauth, opt, callback) {
+		opt.headers = {
+			"Authorization" : "Bearer " + oauth.access_token,
+			"accept" : "application/json;charset=UTF-8",
+			"content-type" : "application/json"
+		} 
+		request(opt, callback);
+
+}
+
+
+
+			
 module.exports.Connection = Connection;
